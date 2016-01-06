@@ -1,34 +1,32 @@
-{ stdenv, fetchurl, mono, makeWrapper, lua
-, SDL2, freetype, openal, systemd, pkgconfig
-}:
+{ stdenv, fetchFromGitHub, mono, makeWrapper, lua, dotnetPackages, SDL2,
+  freetype, openal, systemd, pkgconfig }:
 
-let
-  version = "20141029";
-in stdenv.mkDerivation rec {
+stdenv.mkDerivation rec {
   name = "openra-${version}";
+  version = "20151224";
 
-  meta = with stdenv.lib; {
-    description = "Real Time Strategy game engine recreates the C&C titles";
-    homepage    = "http://www.open-ra.org/";
-    license     = licenses.gpl3;
-    platforms   = platforms.linux;
-    maintainers = with maintainers; [ iyzsong ];
-  };
-
-  src = fetchurl {
-    name = "${name}.tar.gz";
-    url = "https://github.com/OpenRA/OpenRA/archive/release-${version}.tar.gz";
-    sha256 = "082rwcy866k636s4qhbry3ja2p81mdz58bh1dw2mic5mv2q6p67r";
+  src = fetchFromGitHub {
+    owner = "OpenRA";
+    repo = "OpenRA";
+    rev = "release-${version}";
+    sha256 = "1kx9h2vv8z33jsqsv3c5vsqjihpxf6bqdakbwaz98mks2sxhkyr7";
   };
 
   dontStrip = true;
 
-  buildInputs = [ lua ];
+  buildInputs = [
+    lua
+    dotnetPackages.SharpZipLib
+    dotnetPackages.MaxMindDb
+    dotnetPackages.MaxMindGeoIP2
+    dotnetPackages.FuzzyLogicLibrary
+    dotnetPackages.SmartIrc4net
+  ];
+
   nativeBuildInputs = [ mono makeWrapper lua pkgconfig ];
 
   patchPhase = ''
     sed -i 's/^VERSION.*/VERSION = release-${version}/g' Makefile
-    substituteInPlace configure --replace /bin/bash "$shell" --replace /usr/local/lib "${lua}/lib"
   '';
 
   preConfigure = ''
@@ -43,9 +41,20 @@ in stdenv.mkDerivation rec {
       --prefix PATH : "${mono}/bin" \
       --set PWD $out/lib/openra/ \
       --prefix LD_LIBRARY_PATH : "${runtime}"
-      
+
     mkdir -p $out/bin
-    echo "cd $out/lib/openra && $out/lib/openra/launch-game.sh" > $out/bin/openra
+    cat > "$out/bin/openra" << EOF
+    #!${stdenv.shell}
+    cd $out/lib/openra && $out/lib/openra/launch-game.sh
+    EOF
     chmod +x $out/bin/openra
   '';
+
+  meta = with stdenv.lib; {
+    description = "Real Time Strategy game engine recreates the C&C titles";
+    homepage    = "http://www.open-ra.org/";
+    license     = licenses.gpl3;
+    platforms   = platforms.linux;
+    maintainers = with maintainers; [ iyzsong ];
+  };
 }

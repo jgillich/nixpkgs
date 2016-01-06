@@ -118,6 +118,57 @@ let self = dotnetPackages // overrides; dotnetPackages = with self; {
     outputFiles = [ "lib/net40/*" ];
   };
 
+  SharpZipLib = fetchNuGet {
+    baseName = "SharpZipLib";
+    version = "0.86.0";
+    sha256 = "01w2038gckfnq31pncrlgm7d0c939pwr1x4jj5450vcqpd4c41jr";
+    outputFiles = [ "lib/20/*" ];
+  };
+
+  #RestSharp = fetchNuGet {
+  #  baseName = "RestSharp";
+  #  version = "105.2.3";
+  #  sha256 = "0rgqy0afwm50gq5ca94w16s565yx5wf961683ghfld6ir0k3dhlf";
+  #  outputFiles = [ "lib/net4-client/*" ];
+  #};
+
+  MaxMindDb = fetchNuGet {
+    baseName = "MaxMind.Db";
+    version = "1.1.0.0";
+    propagatedBuildInputs = [ NewtonsoftJson ];
+    sha256 = "0lixl76f7k3ldiqzg94zh13gn82w5mm5dx72y97fcqvp8g6nj3ds";
+    outputFiles = [ "lib/net40/*" ];
+  };
+
+  MaxMindGeoIP2 = fetchNuGet {
+    baseName = "MaxMind.GeoIP2";
+    version = "2.3.1";
+    propagatedBuildInputs = [ MaxMindDb ];
+    sha256 = "1s44dvjnmj1aimbrgkmpj6h5dn1w6acgqjch1axc76yz6hwknqgf";
+    outputFiles = [ "lib/net40/*" ];
+  };
+
+  FuzzyLogicLibrary = fetchNuGet {
+    baseName = "FuzzyLogicLibrary";
+    version = "1.2.0";
+    sha256 = "0x518i8d3rw9n51xwawa4sywvqd722adj7kpcgcm63r66s950r5l";
+    outputFiles = [ "bin/Release/*" ];
+  };
+
+  SmartIrc4net = fetchNuGet {
+    baseName = "SmartIrc4net";
+    version = "0.4.5.1";
+    sha256 = "1k6zc6xsqfzj7nc9479d32akj6d37jq6i1qirmz1i66p52zb5hm1";
+    outputFiles = [ "lib/net40/*" ];
+  };
+
+  #SharpFont = fetchNuGet {
+  #  baseName = "SharpFont";
+  #  version = "3.0.1";
+  #  sha256 = "0rgqy0afwm50gq5ca94w16s565yx5wf961683ghfld6ir0k3dhlf";
+  #  outputFiles = [ "lib/net20/*" ];
+  #};
+
   # SOURCE PACKAGES
 
   Deedle = buildDotnetPackage rec {
@@ -163,6 +214,32 @@ let self = dotnetPackages // overrides; dotnetPackages = with self; {
       license = stdenv.lib.licenses.free;
       maintainers = with stdenv.lib.maintainers; [ obadz ];
       platforms = with stdenv.lib.platforms; linux;
+    };
+  };
+
+  Eluant = buildDotnetPackage rec {
+    baseName = "Eluant";
+    version = "20151127";
+
+    src = fetchFromGitHub {
+      owner = "OpenRA";
+      repo = baseName;
+      rev = "${version}";
+      sha256 = "115zzh3q57w8wr02cl2v8wijnj1rg01j1mk9zbzixbb4aird72n7";
+    };
+
+    buildInputs = [
+      mono
+    ];
+
+    xBuildFiles = [ "Eluant.sln" ];
+    outputFiles = [ "bin/*" "LICENSE.md" ];
+
+    meta = with stdenv.lib; {
+      description = " A set of C# bindings for Lua with a specific focus on building sandboxes.";
+      homepage = https://github.com/OpenRA/Eluant;
+      license = licenses.mit;
+      maintainers = with maintainers; [ jgillich ];
     };
   };
 
